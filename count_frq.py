@@ -8,10 +8,6 @@ from collections import Counter
 import nltk
 from nltk.corpus import stopwords
 
-dir_name = ".\PY1_Lesson_2.3"
-min_length = 3
-json_files = list()
-xml_files = list()
 
 def clean_html(raw_html):
     cleanr = re.compile('<.*?>')
@@ -51,12 +47,16 @@ def check_encoding(fname):
     result = chardet.detect(rawdata)
     return result['encoding']
 
-def get_all_words(raw_text):
+def get_all_words(raw_text, min_length=3):
     mytext = clean_text(raw_text)
     return [clean_spets(w.lower()) for w in mytext.split() if len(w) > min_length and not w.isnumeric()]
 
 
 def main():
+    dir_name = ".\PY1_Lesson_2.3"
+    json_files = list()
+    xml_files = list()
+
     russian_stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=True)
     my_stop_words = set(stopwords.words('russian')+['такж', 'эт', 'котор', 'год', 'нов'])
 
@@ -71,7 +71,7 @@ def main():
     for file, encod in json_files:
         with open(file, encoding=encod) as f:
             jdata = json.load(f)
-            print ("file: {} loaded, encoding: {}".format(file, encod))
+            print ("загружен файл: {:>29}  кодировка: {}".format(file, encod))
             news_channel = jdata['rss']['channel']['item']
             for news in news_channel:
                 words = get_all_words(str(news['description']))
@@ -79,13 +79,13 @@ def main():
 
     clean_json_text = [ w for w in map(russian_stemmer.stem, all_json_text) if w not in my_stop_words ]
     all_json_words_frq = sorted(Counter(clean_json_text).items(), key=operator.itemgetter(1), reverse=True)
-    print("\n10 наиболее популярных слов в загруженных json текстах:\n", *all_json_words_frq[:10], '\n\n')
+    print("\n10 популярных слов в загруженных json текстах:\n", *all_json_words_frq[:10], '\n\n')
 
     all_xml_text = list()
     for file, encod in xml_files:
         with open(file, encoding=encod) as f:
             dom = minidom.parse(file=f)
-            print("file: {} loaded, encoding: {}".format(file, encod))
+            print("загружен файл: {:>29}  кодировка: {}".format(file, encod))
             items_list = dom.getElementsByTagName('item')
             for item in items_list:
                 words = get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
@@ -93,7 +93,7 @@ def main():
 
     clean_xml_text = [w for w in map(russian_stemmer.stem, all_xml_text) if w not in my_stop_words]
     all_xml_words_frq = sorted(Counter(clean_xml_text).items(), key=operator.itemgetter(1), reverse=True)
-    print ("\n10 наиболее популярных слов в загруженных xml текстах:\n", *all_xml_words_frq[:10], '\n\n')
+    print ("\n10 популярных слов в загруженных xml текстах:\n", *all_xml_words_frq[:10], '\n\n')
 
 if __name__ == "__main__":
     main()
