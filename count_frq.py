@@ -7,6 +7,8 @@ import operator
 from collections import Counter
 import nltk
 from nltk.corpus import stopwords
+russian_stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=True)
+my_stop_words = set(stopwords.words('russian') + ['такж', 'эт', 'котор', 'год', 'нов'])
 
 
 def clean_html(raw_html):
@@ -43,22 +45,27 @@ def clean_spets(word):
 
 
 def check_encoding(fname):
-    rawdata = open(fname, "rb").read()
-    result = chardet.detect(rawdata)
+    raw_data = open(fname, "rb").read()
+    result = chardet.detect(raw_data)
     return result['encoding']
+
 
 def get_all_words(raw_text, min_length=3):
     mytext = clean_text(raw_text)
     return [clean_spets(w.lower()) for w in mytext.split() if len(w) > min_length and not w.isnumeric()]
 
 
+def get_popular_words(n_words, words):
+    stemmed_words = [w for w in map(russian_stemmer.stem, words) if w not in my_stop_words]
+    popular_words = sorted(Counter(stemmed_words).items(), key=operator.itemgetter(1), reverse=True)
+    return popular_words[:n_words]
+
+
 def main():
     dir_name = ".\PY1_Lesson_2.3"
+    max_words = 10
     json_files = list()
     xml_files = list()
-
-    russian_stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=True)
-    my_stop_words = set(stopwords.words('russian')+['такж', 'эт', 'котор', 'год', 'нов'])
 
     for file in os.listdir(dir_name):
         file_name = os.path.join(dir_name, file)
@@ -71,15 +78,13 @@ def main():
     for file, encod in json_files:
         with open(file, encoding=encod) as f:
             jdata = json.load(f)
-            print ("загружен файл: {:>29}  кодировка: {}".format(file, encod))
+            print("загружен файл: {:>29}  кодировка: {}".format(file, encod))
             news_channel = jdata['rss']['channel']['item']
             for news in news_channel:
                 words = get_all_words(str(news['description']))
                 all_json_text += words
 
-    clean_json_text = [ w for w in map(russian_stemmer.stem, all_json_text) if w not in my_stop_words ]
-    all_json_words_frq = sorted(Counter(clean_json_text).items(), key=operator.itemgetter(1), reverse=True)
-    print("\n10 популярных слов в загруженных json текстах:\n", *all_json_words_frq[:10], '\n\n')
+    print(max_words, "популярных слов в загруженных json текстах:\n", *get_popular_words(max_words, all_json_text))
 
     all_xml_text = list()
     for file, encod in xml_files:
@@ -91,9 +96,8 @@ def main():
                 words = get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
                 all_xml_text += words
 
-    clean_xml_text = [w for w in map(russian_stemmer.stem, all_xml_text) if w not in my_stop_words]
-    all_xml_words_frq = sorted(Counter(clean_xml_text).items(), key=operator.itemgetter(1), reverse=True)
-    print ("\n10 популярных слов в загруженных xml текстах:\n", *all_xml_words_frq[:10], '\n\n')
+    print(max_words, "популярных слов в загруженных xml текстах:\n", *get_popular_words(max_words, all_xml_text))
 
 if __name__ == "__main__":
+
     main()
