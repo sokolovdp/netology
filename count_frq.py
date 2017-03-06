@@ -7,8 +7,12 @@ import operator
 from collections import Counter
 import nltk
 from nltk.corpus import stopwords
+
 russian_stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=True)
-my_stop_words = set(stopwords.words('russian') + ['такж', 'эт', 'котор', 'год', 'нов'])
+my_stop_words = set(stopwords.words('russian') + ['такж', 'эт', 'котор', 'год', 'нов', 'дан', 'гост'])
+dir_name = "PY1_Lesson_2.3"
+max_words = 10
+min_word_length = 5
 
 
 def clean_html(raw_html):
@@ -50,7 +54,7 @@ def check_encoding(fname):
     return result['encoding']
 
 
-def get_all_words(raw_text, min_length=3):
+def get_all_words(raw_text, min_length=min_word_length):
     mytext = clean_text(raw_text)
     return [clean_spets(w.lower()) for w in mytext.split() if len(w) > min_length and not w.isnumeric()]
 
@@ -62,8 +66,6 @@ def get_popular_words(n_words, words):
 
 
 def main():
-    dir_name = ".\PY1_Lesson_2.3"
-    max_words = 10
     json_files = list()
     xml_files = list()
 
@@ -74,29 +76,31 @@ def main():
         elif file.endswith(".xml"):
             xml_files.append((file_name, check_encoding(file_name)))
 
-    all_json_text = list()
+    # all_json_text = list()
     for file, encod in json_files:
         with open(file, encoding=encod) as f:
+            words = list()
             jdata = json.load(f)
-            print("загружен файл: {:>29}  кодировка: {}".format(file, encod))
+            print("\nзагружен файл: {}  кодировка: {}".format(file, encod))
             news_channel = jdata['rss']['channel']['item']
             for news in news_channel:
-                words = get_all_words(str(news['description']))
-                all_json_text += words
+                words += get_all_words(str(news['description']))
+                # all_json_text += words
+            print(max_words, "популярных слов в загруженном тексте:\n",
+                *get_popular_words(max_words, words))   # all_json_text))
 
-    print(max_words, "популярных слов в загруженных json текстах:\n", *get_popular_words(max_words, all_json_text))
-
-    all_xml_text = list()
+    # all_xml_text = list()
     for file, encod in xml_files:
         with open(file, encoding=encod) as f:
+            words = list()
             dom = minidom.parse(file=f)
-            print("загружен файл: {:>29}  кодировка: {}".format(file, encod))
+            print("\nзагружен файл: {}  кодировка: {}".format(file, encod))
             items_list = dom.getElementsByTagName('item')
             for item in items_list:
-                words = get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
-                all_xml_text += words
-
-    print(max_words, "популярных слов в загруженных xml текстах:\n", *get_popular_words(max_words, all_xml_text))
+                words += get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
+                # all_xml_text += words
+            print(max_words, "популярных слов в загруженном тексте:\n",
+                    *get_popular_words(max_words, words))   # all_xml_text))
 
 if __name__ == "__main__":
 
