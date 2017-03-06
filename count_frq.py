@@ -12,7 +12,7 @@ russian_stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=True)
 my_stop_words = set(stopwords.words('russian') + ['такж', 'эт', 'котор', 'год', 'нов', 'дан', 'гост'])
 dir_name = "PY1_Lesson_2.3"
 max_words = 10
-min_word_length = 5
+min_word_length = 6
 
 
 def clean_html(raw_html):
@@ -68,6 +68,9 @@ def get_popular_words(n_words, words):
 def main():
     json_files = list()
     xml_files = list()
+
+    print("{1} популярных слов длиннее {2} символов в json и xml файлах в директории {0}\n".format(dir_name, max_words,
+            min_word_length))
 
     for file in os.listdir(dir_name):
         file_name = os.path.join(dir_name, file)
