@@ -65,10 +65,10 @@ def main():
     print('Загружено из исходного .тхт файла {} рецепта:'.format(len(cook_book)))
     pp.pprint(cook_book)
 
-    with open('recept.json', 'w', encoding='utf8') as json_file:
+    with open('recept.json', 'w', encoding='utf-8') as json_file:
         json.dump(cook_book, json_file, indent=2, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
     print('\n1) Рецепты записаны в файл: recept.json')
-    with open('recept.json', 'r', encoding='utf8') as json_file:
+    with open('recept.json', 'r', encoding='utf-8') as json_file:
         data_loaded = json.load(json_file)
     if cook_book == data_loaded:
         print('   Данные загруженные из json файла идентичны исходным\n')
@@ -76,9 +76,9 @@ def main():
         print('   Ошибка в формате загруженных данных из json файла\n')
 
     with open('recept.yaml', 'w', encoding='utf8') as yaml_file:
-        yaml.dump(cook_book, yaml_file, default_flow_style=False, encoding='utf8')
+        yaml.dump(cook_book, yaml_file, default_flow_style=False, encoding='utf-8', allow_unicode=True)
     print('\n2) Рецепты записаны в файл: recept.yaml')
-    with open('recept.yaml', 'r', encoding='utf8') as yaml_file:
+    with open('recept.yaml', 'r', encoding='utf-8') as yaml_file:
         data_loaded = yaml.load(yaml_file)
     if cook_book == data_loaded:
         print('   Данные загруженные из yaml файла идентичны исходным\n')
