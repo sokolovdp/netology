@@ -28,24 +28,17 @@ def clean_slash(raw_text):
 
 
 def clean_punctuation(raw_text):
-    cleanr = re.compile('[\r\n{}()%:,."\'_-]')
+    cleanr = re.compile('[\r\n{}…()!&#;%:,."\'’‘_\-/\\“”»«€–0123456789]')
     cleantext1 = re.sub(cleanr, ' ', raw_text)
-    cleanr = re.compile('cdata')
-    cleantext2 = re.sub(cleanr, '', cleantext1)
-    cleanr = re.compile(r'\\r\\n')
+    cleanr = re.compile('cdata|\\n')
+    cleantext2 = re.sub(cleanr, ' ', cleantext1)
+    cleanr = re.compile('\\\\r|\\\\n')
     cleantext3 = re.sub(cleanr, '', cleantext2)
-    cleanr = re.compile(r'\\n\\n')
-    cleantext4 = re.sub(cleanr, '', cleantext3)
-    return cleantext4
+    return cleantext3
 
 
 def clean_text(sentence):
     return clean_punctuation(clean_slash(clean_html(sentence)))
-
-
-def clean_spets(word):
-    spets_sym = '/\“”»«€'
-    return "".join([c for c in word if c not in spets_sym])
 
 
 def check_encoding(fname):
@@ -56,7 +49,7 @@ def check_encoding(fname):
 
 def get_all_words(raw_text, min_length=min_word_length):
     mytext = clean_text(raw_text)
-    return [clean_spets(w.lower()) for w in mytext.split() if len(w) > min_length and not w.isnumeric()]
+    return [w.lower() for w in mytext.split() if len(w) > min_length] # and not w.isnumeric()]
 
 
 def get_popular_words(n_words, words):
@@ -79,7 +72,6 @@ def main():
         elif file.endswith(".xml"):
             xml_files.append((file_name, check_encoding(file_name)))
 
-    # all_json_text = list()
     for file, encod in json_files:
         with open(file, encoding=encod) as f:
             words = list()
@@ -88,11 +80,11 @@ def main():
             news_channel = jdata['rss']['channel']['item']
             for news in news_channel:
                 words += get_all_words(str(news['description']))
-                # all_json_text += words
+            # print(*words)
+            # input('continue?')
             print(max_words, "популярных слов в загруженном тексте:\n",
-                *get_popular_words(max_words, words))   # all_json_text))
+                *get_popular_words(max_words, words))
 
-    # all_xml_text = list()
     for file, encod in xml_files:
         with open(file, encoding=encod) as f:
             words = list()
@@ -101,9 +93,8 @@ def main():
             items_list = dom.getElementsByTagName('item')
             for item in items_list:
                 words += get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
-                # all_xml_text += words
             print(max_words, "популярных слов в загруженном тексте:\n",
-                    *get_popular_words(max_words, words))   # all_xml_text))
+                    *get_popular_words(max_words, words))
 
 if __name__ == "__main__":
 
