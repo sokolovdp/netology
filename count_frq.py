@@ -16,29 +16,20 @@ min_word_length = 6
 
 
 def clean_html(raw_html):
-    cleanr = re.compile('<.*?>')
-    cleantext = re.sub(cleanr, ' ', raw_html)
-    return cleantext
+    return re.sub('<.*?>', ' ', raw_html)
 
 
 def clean_slash(raw_text):
-    cleanr = re.compile('/.*?/')
-    cleantext = re.sub(cleanr, ' ', raw_text)
-    return cleantext
+    return re.sub('/.*?/', ' ', raw_text)
 
 
 def clean_punctuation(raw_text):
-    cleanr = re.compile('[\r\n{}…()!&#;%:,."\'’‘_\-/\\“”»«€–0123456789]')
-    cleantext1 = re.sub(cleanr, ' ', raw_text)
-    cleanr = re.compile('cdata|\\n')
-    cleantext2 = re.sub(cleanr, ' ', cleantext1)
-    cleanr = re.compile('\\\\r|\\\\n')
-    cleantext3 = re.sub(cleanr, '', cleantext2)
-    return cleantext3
+    cleantext = re.sub('[\r\n{}…()!&#;%:,."\'’‘_\-/\\“”»«€–0123456789]', ' ', raw_text)
+    return re.sub('\\\\r|\\\\n', '', re.sub('cdata|\\n', ' ', cleantext))
 
 
-def clean_text(sentence):
-    return clean_punctuation(clean_slash(clean_html(sentence)))
+def clean_text(raw_text):
+    return clean_punctuation(clean_slash(clean_html(raw_text)))
 
 
 def check_encoding(fname):
@@ -59,12 +50,11 @@ def get_popular_words(n_words, words):
 
 
 def main():
-    json_files = list()
-    xml_files = list()
-
-    print("{1} популярных слов длиннее {2} символов в json и xml файлах в директории {0}\n".format(dir_name, max_words,
+    print("{1} популярных слов длиннее {2} символов в json и xml файлах, директория: {0}\n".format(dir_name, max_words,
             min_word_length))
 
+    json_files = list()
+    xml_files = list()
     for file in os.listdir(dir_name):
         file_name = os.path.join(dir_name, file)
         if file.endswith(".json"):
@@ -76,7 +66,7 @@ def main():
         with open(file, encoding=encod) as f:
             words = list()
             jdata = json.load(f)
-            print("\nзагружен файл: {}  кодировка: {}".format(file, encod))
+            print("\nфайл: {}  кодировка: {}".format(file, encod))
             news_channel = jdata['rss']['channel']['item']
             for news in news_channel:
                 words += get_all_words(str(news['description']))
@@ -89,7 +79,7 @@ def main():
         with open(file, encoding=encod) as f:
             words = list()
             dom = minidom.parse(file=f)
-            print("\nзагружен файл: {}  кодировка: {}".format(file, encod))
+            print("\nфайл: {}  кодировка: {}".format(file, encod))
             items_list = dom.getElementsByTagName('item')
             for item in items_list:
                 words += get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
@@ -97,5 +87,4 @@ def main():
                     *get_popular_words(max_words, words))
 
 if __name__ == "__main__":
-
     main()
