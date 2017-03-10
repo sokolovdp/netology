@@ -9,7 +9,7 @@ import nltk
 from nltk.corpus import stopwords
 
 russian_stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=True)
-my_stop_words = set(stopwords.words('russian') + ['такж', 'эт', 'котор', 'год', 'нов', 'дан', 'гост'])
+my_stop_words = set(stopwords.words('russian') + ['котор', 'прошл', 'сообща', 'сообщ', 'турист'])
 dir_name = "PY1_Lesson_2.3"
 max_words = 10
 min_word_length = 6
