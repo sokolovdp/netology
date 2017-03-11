@@ -3,7 +3,6 @@ from xml.dom import minidom
 import os
 import chardet
 import re
-import operator
 from collections import Counter
 import nltk
 from nltk.corpus import stopwords
@@ -40,18 +39,18 @@ def check_encoding(fname):
 
 def get_all_words(raw_text, min_length=min_word_length):
     mytext = clean_text(raw_text)
-    return [w.lower() for w in mytext.split() if len(w) > min_length] # and not w.isnumeric()]
+    return [w.lower() for w in mytext.split() if len(w) > min_length]  # and not w.isnumeric()]
 
 
 def get_popular_words(n_words, words):
     stemmed_words = [w for w in map(russian_stemmer.stem, words) if w not in my_stop_words]
-    popular_words = sorted(Counter(stemmed_words).items(), key=operator.itemgetter(1), reverse=True)
+    popular_words = sorted(Counter(stemmed_words).items(), key=lambda tup: tup[1], reverse=True)
     return popular_words[:n_words]
 
 
 def main():
     print("{1} популярных слов длиннее {2} символов в json и xml файлах, директория: {0}\n".format(dir_name, max_words,
-            min_word_length))
+                                                                                                   min_word_length))
 
     json_files = list()
     xml_files = list()
@@ -73,7 +72,7 @@ def main():
             # print(*words)
             # input('continue?')
             print(max_words, "популярных слов в загруженном тексте:\n",
-                *get_popular_words(max_words, words))
+                  *get_popular_words(max_words, words))
 
     for file, encod in xml_files:
         with open(file, encoding=encod) as f:
@@ -84,7 +83,8 @@ def main():
             for item in items_list:
                 words += get_all_words(item.getElementsByTagName('description').item(0).firstChild.nodeValue)
             print(max_words, "популярных слов в загруженном тексте:\n",
-                    *get_popular_words(max_words, words))
+                  *get_popular_words(max_words, words))
+
 
 if __name__ == "__main__":
     main()
