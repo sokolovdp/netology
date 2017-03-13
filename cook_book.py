@@ -2,8 +2,9 @@
 
 #  Create cook book
 # data = "Омлет\n3\nЯйца | 2 | шт\nМолоко | 50 | мл\nПомидор | 100 | г\nКаша\n2\nМолоко | 200 | мл\nКрупа | 100 | мл"
-# # with open('recepts.txt', 'w', encoding='utf8') as myfile:
+# with open('recepts.txt', 'w', encoding='utf8') as myfile:
 #     myfile.write(data)
+
 import re
 
 
@@ -49,7 +50,6 @@ def user_requests(book):
 
 
 def main():
-
     user_requests(download_cook_book())
 
 if __name__ == "__main__":
