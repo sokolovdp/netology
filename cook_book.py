@@ -17,21 +17,21 @@ def download_cook_book():
         ingr_list = list()
         for _, match2 in zip(range(int(match1.group('num_ing'))), patern2.finditer(data[match1.end():])):
             ingr_list.append([match2.group('ing'), match2.group('amn'), match2.group('unt')])
-        cook_list[match1.group('recep')] = (int(match1.group('num_ing')), ingr_list)
+        cook_list[match1.group('recep')] = [int(match1.group('num_ing')), ingr_list]
+
+    print("Загружено рецептов: {}".format(len(cook_list)))
     return cook_list
 
 
-def prepare_shop_list(book, key, n):
-    n_ingr = book[key][0]
-    ingr_list = book[key][1]
-    print("На {} порций {} вам надо купить следующие {} продукта:".format(n, key, n_ingr))
-    for ing in ingr_list:
-        print(ing[0], int(ing[1])*n, ing[2])
+def user_requests(book):
 
+    def prepare_shop_list(book, key, n):
+        n_ingr = book[key][0]
+        ingr_list = book[key][1]
+        print("На {} порций {} вам надо купить следующие {} продукта:".format(n, key, n_ingr))
+        for ing in ingr_list:
+            print(ing[0], int(ing[1]) * n, ing[2])
 
-def main():
-    cook_book = download_cook_book()
-    print("Загружено рецептов: {}".format(len(cook_book)))
     while True:
         name = input("Введите блюдо и кол-во порций (ппц - конец работы): ").lower()
         if name.strip() == 'ппц':
@@ -42,11 +42,15 @@ def main():
         except ValueError:
             print("повторите ввод: 'блюдо <кол-во порций>'")
         else:
-            if name in cook_book.keys():
-                prepare_shop_list(cook_book, name, amount)
+            if name in book.keys():
+                prepare_shop_list(book, name, amount)
             else:
                 print("нет такого блюда")
 
+
+def main():
+
+    user_requests(download_cook_book())
 
 if __name__ == "__main__":
     main()
