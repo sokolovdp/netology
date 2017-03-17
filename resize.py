@@ -52,6 +52,15 @@ def find_working_dir(dir_n):
     return w_path
 
 
+def convert_process(new_dir, files, size):   # может быть использован в многопроцессорном подходе
+    for file in files:
+        err = subprocess.call('convert.exe ' + file + ' -resize ' + str(size) + ' resized_' + file)
+        if err:
+            print("unexpected error: {} during image {} processing, image ignored".format(err, file))
+        else:
+            shutil.move('resized_' + file, new_dir)
+
+
 def convert_image_files(directory, files, size):
     os.chdir(directory)
     print('\n{0} images in folder: {1} will be resized'.format(len(files), directory.split('\\')[-1], size))
@@ -62,11 +71,7 @@ def convert_image_files(directory, files, size):
         shutil.rmtree(result_dir)
         os.makedirs(result_dir)
 
-    for file in files:
-        err = subprocess.call('convert.exe ' + file + ' -resize ' + str(size) + ' resized_' + file)
-        if err:
-            print("unexpected error: {} during image {} processing, image ignored".format(err, file))
-        shutil.move('resized_' + file, result_dir)
+    convert_process(result_dir, files, size)
 
 
 def main(argv):
