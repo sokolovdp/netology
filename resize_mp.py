@@ -4,45 +4,21 @@
 #  - конвертируются все файлы  с расширениями 'jpg', 'png', 'jpeg', 'gif', 'bmp'
 #  - для Windows: если имя директории содержит пробелы, то имя указывается в кавычках: "Advanced Migrations"
 #  - директория ищется относительно текущей директории
-#  - конвертируемые файлы помещаются в директорию в resized_images
-
+#  - конвертируемые файлы помещаются в директорию в Result
 
 import sys
 import os
-from getopt import GetoptError, getopt
 import shutil
 import subprocess
 from multiprocessing import Process
+import argparse
 
-
-help_line = 'usage: resize.py [-d <directory/subdirectory>] [-s <new_size>] '
 default_size = 100
+default_dir = '.'
 image_file_ext = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
-result_dir = 'resized_images'
+result_dir = 'Result'
 max_processes = 4
-
-
-def get_dir_size(argv):
-    try:
-        opts, args = getopt(argv, "hd:s:", ["dir=", "size="])
-    except GetoptError:
-        print(help_line)
-        sys.exit(1)
-    dir_n = ''
-    pic_size = default_size
-    for opt, arg in opts:
-        if opt == '-h':
-            print(help_line)
-            sys.exit()
-        elif opt in ("-d", "--dir"):
-            dir_n = arg
-        elif opt in ("-s", "--size"):
-            try:
-                pic_size = int(arg)
-            except ValueError:
-                print(help_line)
-                sys.exit(2)
-    return dir_n, pic_size
+max_images = 8
 
 
 def find_working_dir(dir_n):
@@ -66,7 +42,8 @@ def convert_process(new_dir, files, size):
 
 def convert_image_files(directory, files, size):
     os.chdir(directory)
-    print('\n{0} images in folder: {1} will be resized'.format(len(files), directory.split('\\')[-1], size))
+    print('\n{0} images in folder: {1} will be resized to {2} width'.format(len(files),
+                                                                            directory.split('\\')[-1], size))
 
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
@@ -74,15 +51,17 @@ def convert_image_files(directory, files, size):
         shutil.rmtree(result_dir)
         os.makedirs(result_dir)
 
-    splitted_list = [files[i:i+max_processes] for i in range(0, len(files), max_processes)]
-    for short_list in splitted_list:
-        p = Process(target=convert_process, args=(result_dir, short_list, size,))
-        p.start()
-        p.join()
+    if len(files) > max_images:  # too many images let's use multiprocessing
+        splitted_list = [files[i:i + max_processes] for i in range(0, len(files), max_processes)]
+        for short_list in splitted_list:
+            p = Process(target=convert_process, args=(result_dir, short_list, size,))
+            p.start()
+            p.join()
+    else:  # few images, so we can handle them in one process
+        convert_process(result_dir, files, size)
 
 
-def main(argv):
-    dir_name, resize = get_dir_size(argv)
+def main(dir_name, resize):
     working_path = find_working_dir(dir_name)
 
     image_files = list()
@@ -97,4 +76,11 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-d", "--dir", dest="dir", action="store", default=default_dir,
+                    help="path to directory with images")
+    ap.add_argument("-s", "--size", dest="size", action="store", type=int, default=default_size,
+                    help="new image width in pixels")
+    args = ap.parse_args(sys.argv[1:])
+
+    main(args.dir, args.size)
