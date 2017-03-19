@@ -1,10 +1,10 @@
 # Программа (мульти-процессорная версия) изменяет размер всех картинок в указанной директории
-#  - вызов: resize.py [-d <directory/subdirectory>] [-s <new_size>]
+#  - вызов: resize.py [-h] [-d <directory_path>] [-s <width>]
 #  - если директория не указана, то поиск осуществляется в текущей директории
 #  - конвертируются все файлы  с расширениями 'jpg', 'png', 'jpeg', 'gif', 'bmp'
 #  - для Windows: если имя директории содержит пробелы, то имя указывается в кавычках: "Advanced Migrations"
 #  - директория ищется относительно текущей директории
-#  - конвертируемые файлы помещаются в директорию в Result
+#  - конвертируемые файлы помещаются в создаваемую директорию в Result
 
 import sys
 import os
@@ -25,7 +25,7 @@ def find_working_dir(dir_n):
     w_path = os.path.join(os.getcwd(), dir_n)
     if not os.path.exists(w_path):
         print('no such directory: ', w_path)
-        sys.exit(3)
+        sys.exit(1)
 
     return w_path
 
@@ -33,11 +33,9 @@ def find_working_dir(dir_n):
 def convert_process(new_dir, files, size):
     # print('started process id:', os.getpid())
     for file in files:
-        err = subprocess.call('convert.exe ' + file + ' -resize ' + str(size) + ' resized_' + file)
+        err = subprocess.call(['convert.exe', file, '-resize', str(size), os.path.join(new_dir, 'resized_%s' % file)])
         if err:
-            print("unexpected error: {} during image {} processing, image ignored".format(err, file))
-        else:
-            shutil.move('resized_' + file, new_dir)
+            print("unexpected error: {} during image {} processing, file ignored".format(err, file))
 
 
 def convert_image_files(directory, files, size):
