@@ -1,5 +1,5 @@
 # Программа проверяет тестовые файлы с нужным расширением в указанной директории на наличие поисковых слов
-#  - вызов: search_dir.py [-d <directory/subdirectory>] [-e <file_extension>]
+#  - вызов: search_dir.py [-h] [-d <directory/subdirectory>] [-e <file_extension>]
 #  - если директория не указана, то поиск осуществляется в текущей директории
 #  - если расширение не указано, то проверяются все файлы в директории
 #  - для Windows: если имя директории содержит пробелы, то имя указывается в кавычках: "Advanced Migrations"
@@ -10,30 +10,11 @@
 
 import sys
 import os
-import getopt
+import argparse
 import chardet
 
-help_line = 'usage: search_dir.py [-d <directory/subdirectory>] [-e <file_extension>] '
-
-
-def get_dir_ext(argv):
-    try:
-        opts, args = getopt.getopt(argv, "hd:e:", ["dir=", "ext="])
-    except getopt.GetoptError:
-        print(help_line)
-        sys.exit(1)
-    dir_n = ''
-    file_e = ''
-    for opt, arg in opts:
-        if opt == '-h':
-            print(help_line)
-            sys.exit()
-        elif opt in ("-d", "--dir"):
-            dir_n = arg
-        elif opt in ("-e", "--ext"):
-            file_e = arg
-
-    return dir_n, file_e
+default_ext = ''
+default_dir = '.'
 
 
 def find_working_dir(dir_n):
@@ -94,8 +75,8 @@ def print_result(result):
         print("  " + file)
 
 
-def main(argv):
-    dir_name, file_ext = get_dir_ext(argv)
+def main(dir_name, file_ext):
+
     working_path = find_working_dir(dir_name)
 
     search_files = list()
@@ -110,4 +91,11 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-d", "--dir", dest="dir", action="store", default=default_dir,
+                    help="path to directory with files to be checked")
+    ap.add_argument("-e", "--ext", dest="ext", action="store", default=default_ext,
+                    help="files extension to search in")
+    args = ap.parse_args(sys.argv[1:])
+
+    main(args.dir, args.ext)
