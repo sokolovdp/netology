@@ -53,7 +53,7 @@ def search_in_files(directory, files):
     word_list = list()
     print('\n{} files found'.format(len(files)))
     while True:
-        word = input("word or <enter> to exit: ")
+        word = input("\nword or <enter> to exit: ")
         if word == '':
             print("stopped")
             break
@@ -61,13 +61,14 @@ def search_in_files(directory, files):
         if len(temp_list):  # if word was not found ignore it
             word_list.append(word)
             files = temp_list
-        print('{} files found'.format(len(files)))
+        print('{} files found:'.format(len(files)))
+        print(*files, sep='\n')
     return files, word_list
 
 
 def print_result(result):
     search_files, search_words = result
-    print("\n\nsearch words were:")
+    print("\nsearch words were:")
     for word in search_words:
         print("  " + word)
     print("\nfound files are:")
