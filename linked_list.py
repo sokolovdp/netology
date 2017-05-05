@@ -49,6 +49,6 @@ for i in range(10):
 main_list.print_list()
 
 while not main_list.is_empty():
-    reverse_list.insert(main_list.pop())
+    reverse_list.insert(main_list.getout())
 
 reverse_list.print_list()
