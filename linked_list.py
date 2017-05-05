@@ -26,7 +26,7 @@ class LinkedList:   # but looks like a stack )))
     def is_empty(self):
         return self.head is None
 
-    def getout(self):   # pop from head
+    def getout(self):   # get out the elelemnt from the list
         current = self.head
         if current:
             self.head = current.get_next()
