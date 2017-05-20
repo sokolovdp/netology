@@ -21,7 +21,8 @@ VERSION = '5.62'  # VK API Version
 MAX_FRIENDS = 1000  # Max number of friends to analyse
 VK_TIMEOUT = 1.1  # Time in secs to pause when limit of requests is reached
 VK_REQ_LIMIT = 3  # Max number of requests to VK API per second
-PROGRESS_BAR_DELAY = 2  # Delay in secs between progress bar updates
+PROGRESS_BAR_DELAY = 2.5  # Delay in secs between progress bar updates
+PROGRESS_BAR_DELAY_LAST = 1.1  # Final delay in progress bar updates
 API_TOKEN = "d13e692be69592b09fd22c77a590dd34e186e6d696daa88d6d981e1b4e296b14acb377e82dcbc81dc0f22"
 
 vk_requests_counter = 0  # VK API request counter,  to calculate time to start delay
@@ -197,7 +198,7 @@ def main(token: "str VK api token",
             progress_bar(i, friends_number, status='loading friends groups')
             start_time = time.clock()
     else:
-        time.sleep(PROGRESS_BAR_DELAY)
+        time.sleep(PROGRESS_BAR_DELAY_LAST)  # last delay to make sure that previous progress bar update was done
         progress_bar(friends_number, friends_number, status="loaded groups data for {} friends".format(friends_number))
         print("\n")
 
@@ -230,7 +231,6 @@ if __name__ == '__main__':
         if ivalue < 0 or ivalue > 99:
             raise argparse.ArgumentTypeError("{} is an invalid limit value".format(value))
         return ivalue
-
 
     ap = argparse.ArgumentParser(description='This program looks for secret groups of the VK user')
     ap.add_argument("uid", help="user id or short 'screen name'")
