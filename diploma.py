@@ -5,7 +5,7 @@
 #     "ПИВНАЯ ЛИЦЕНЗИЯ" :
 # Этот код написал Dmitrii Sokolov <sokolovdp@gmail.com>.  
 # В случае использования всего кода или его частей, вы обязаны при личной
-# встрече угостить меня бокалом пива объемом 0.5 литра!
+# встрече угостить меня бокалом пива объемом 0.5 литра ;)
 # Исходный код: https://github.com/sokolovdp/netology/diploma.py
 # Идея пивной лицензии взята у Терри Инь <terry.yinzhe@gmail.com>
 # ------------------------------------------------------------------------
@@ -14,6 +14,7 @@ import sys
 import argparse
 import requests
 import time
+from collections import Counter
 from pprint import pprint
 
 VERSION = '5.62'  # VK API Version
@@ -46,13 +47,6 @@ def progress_bar(iteration: "int current iteration",
     bar_empty = '-' * (barlength - nb_bar_fill)
     sys.stdout.write("\r[{0}] {1}% {2}".format(str(bar_fill + bar_empty), percent, status))
     sys.stdout.flush()
-
-
-def progress_bar_done(total: "int total result number",
-                      status: "str process status message" = ''):
-    time.sleep(PROGRESS_BAR_DELAY)
-    progress_bar(total, total, status=status)
-    print('\n')
 
 
 def get_response(url: "str url address",
@@ -171,7 +165,7 @@ def write_json_file(uid: "int user id",
     data = "[\n{}\n]".format(",\n".join(lines))
     with open(filename, 'w', encoding="utf8") as jf:
         jf.write(data)
-    print("group analysis results are written into {} file".format(filename))
+    print("Group analysis results has been stored in {}".format(filename))
 
 
 def main(token: "str VK api token",
@@ -181,10 +175,9 @@ def main(token: "str VK api token",
          limit: "int number friends per group"):
     user_friends = get_friends_list(token, uid)
     user_groups = get_user_groups_list(token, uid)
-
+    friends_number = len(user_friends)
     print("{}({}) has {} friends and participate in {} groups\n".format(uname, uid, len(user_friends),
                                                                         len(user_groups)))
-
     if flog:
         write_into_log(flog, uid, user_groups)  # write to log user id and his groups
 
@@ -201,23 +194,22 @@ def main(token: "str VK api token",
         else:
             friends_wo_groups.append(friend)
         if time.clock() - start_time > PROGRESS_BAR_DELAY:  # check if it is time to show progress bar
-            progress_bar(i, len(user_friends), status='loading friends groups')
+            progress_bar(i, friends_number, status='loading friends groups')
             start_time = time.clock()
     else:
-        message = "loaded groups data for {} friends".format(len(friends_groups))
-        progress_bar_done(len(user_friends), status=message)
+        time.sleep(PROGRESS_BAR_DELAY)
+        progress_bar(friends_number, friends_number, status="loaded groups data for {} friends".format(friends_number))
+        print("\n")
 
     if flog:
         write_into_log(flog, 0, friends_wo_groups)  # write to log list of friends w/o groups
         flog.close()
 
-    # count number of friends using group, place results in the dict
-    group_counts = dict()  # has group id as key, and counter (number friends in this group) as value
-    for group in friends_groups:
-        group_counts[group] = group_counts.get(group, 0) + 1
+    # count number of friends using each group, place results in the dict
+    group_counts = Counter(friends_groups)
 
-    result = list(set(user_groups) - set(group_counts.keys()))  # define unique user groups
-    if limit > 0:  # add groups where is needed number of friends
+    result = list(set(user_groups) - set(group_counts.keys()))  # unique user groups
+    if limit > 0:  # add groups where friends participate
         for group, count in group_counts.items():
             if group in user_groups and count <= limit:
                 result.append(group)
@@ -227,7 +219,7 @@ def main(token: "str VK api token",
         json = get_group_information(token, group)
         json_lines.append(json)
 
-    write_json_file(uid, json_lines)
+    write_json_file(uid, json_lines)  # store results in  json file
 
 
 if __name__ == '__main__':
@@ -238,6 +230,7 @@ if __name__ == '__main__':
         if ivalue < 0 or ivalue > 99:
             raise argparse.ArgumentTypeError("{} is an invalid limit value".format(value))
         return ivalue
+
 
     ap = argparse.ArgumentParser(description='This program looks for secret groups of the VK user')
     ap.add_argument("uid", help="user id or short 'screen name'")
