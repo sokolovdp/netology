@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8
 # ------------------------------------------------------------------------
-# version = 'ver 1.0  May 20, 2017'
+# version = 'ver 1.1  May 20, 2017'
 #     "ПИВНАЯ ЛИЦЕНЗИЯ" :
 # Этот код написал Dmitrii Sokolov <sokolovdp@gmail.com>.  
 # В случае использования всего кода или его частей, вы обязаны при личной
@@ -40,7 +40,7 @@ def check_timeout():  # control number of requests to VK API per second
 def progress_bar(iteration: "int current iteration",
                  total: "int total result number",
                  status: "str process status message" = '',
-                 barlength: "int process status message" = 50):
+                 barlength: "int bar length in chars" = 50):
     percent = int(round((iteration / total) * 100))
     nb_bar_fill = int(round((barlength * percent) / 100))
     bar_fill = '=' * nb_bar_fill
@@ -50,7 +50,7 @@ def progress_bar(iteration: "int current iteration",
 
 
 def get_response(url: "str url address",
-                 par: " dict with parameters"
+                 par: "dict parameters"
                  ) -> tuple:
     try:
         resp = requests.get(url, par)
