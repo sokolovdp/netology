@@ -9,12 +9,6 @@ from progressbar import Bar
 from vkgroups import VkUser
 
 
-def write_into_log(file: "file object",
-                   uid: "int user id",
-                   data: "list of integers"):
-    file.write("{0},{1}\n".format(uid, ','.join(list(map(str, data)))))
-
-
 def write_json_file(uid: "int user id",
                     groups: "list of dict with groups info"):
     filename = "{}_groups.json".format(uid)

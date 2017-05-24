@@ -19,14 +19,14 @@ class VkUser:
         pars = {'access_token': token, 'v': VERSION, 'user_ids': [], 'fields': ['counters']}
         data, errcode, errmsg = self._get_response('https://api.vk.com/method/users.get', pars)
         if not data:
-            print("user id check error: {} {}".format(errcode, errmsg))
+            print("token check error: {} {}".format(errcode, errmsg))
             exit(4)
         self.token = token
         # check if user_id is valid
         pars = {'access_token': token, 'v': VERSION, 'user_ids': [userid], 'fields': ['counters']}
         data, errcode, errmsg = self._get_response('https://api.vk.com/method/users.get', pars)
         if not data:
-            print("token check error: {} {}".format(errcode, errmsg))
+            print("user id error: {} {}".format(errcode, errmsg))
             exit(5)
         self.uid = data[0]['id']
         self.name = data[0]['first_name'] + ' ' + data[0]['last_name']
